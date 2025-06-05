@@ -1,0 +1,16 @@
+repos:
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: "v0.20.0"
+    hooks:
+      - id: terraform-docs-go
+        args: ["markdown", "table", "--output-file", "README.md", "--recursive", "."]
+  - repo: https://github.com/google/addlicense
+    rev: "master"
+    hooks:
+      - id: addlicense
+        args: [ 
+          "-c", "GoodRx, Inc.",
+          "-ignore", ".pre-commit-config.yaml",
+          "-ignore", ".terraform.lock.hcl",
+          "."
+        ]
