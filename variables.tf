@@ -219,6 +219,14 @@ variable "app_subdomain" {
 
 variable "app_postgres_enabled" {
   type        = bool
+  default     = false
+  description = <<-EOT
+    Toggle to control whether PostgreSQL is deployed.
+  EOT
+}
+
+variable "app_lifecycle_enabled" {
+  type        = bool
   default     = true
   description = <<-EOT
     Toggle to control whether PostgreSQL is deployed.
@@ -266,7 +274,7 @@ variable "app_postgres_username" {
 
 variable "app_redis_enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = <<-EOT
     Toggle to control whether Redis is deployed.
   EOT
@@ -287,7 +295,7 @@ variable "app_redis_port" {
 
 variable "app_distribution_enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = <<-EOT
     Toggle to enable or disable the distribution module (e.g., API, frontend).
   EOT
@@ -308,7 +316,7 @@ variable "app_distribution_subdomain" {
 
 variable "app_buildkit_enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = <<-EOT
     Toggle to control whether BuildKit is deployed (e.g., for image builds).
   EOT
