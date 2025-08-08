@@ -34,6 +34,56 @@ resource "random_password" "app_redis" {
   special = false
 }
 
+resource "time_sleep" "ingress_nginx_controller" {
+  depends_on = [
+    helm_release.ingress_nginx_controller
+  ]
+
+  create_duration = "60s"
+}
+
+resource "helm_release" "app_lifecycle" {
+  count = var.app_lifecycle_enabled ? 1 : 0
+
+  name             = "lifecycle"
+  repository       = "oci://ghcr.io/goodrxoss/helm-charts"
+  chart            = "lifecycle"
+  version          = "0.1.0"
+  namespace        = kubernetes_namespace_v1.app.metadata[0].name
+  create_namespace = false
+
+  values = [
+    yamlencode({
+      global = {
+        domain = var.app_domain
+      }
+      distribution = {
+        ingress = {
+          hostname = "distribution.${var.app_domain}"
+        }
+      }
+      buildkit = {
+        buildkitdToml = <<-EOT
+          debug = true
+          [registry."distribution.${var.app_domain}"]
+            http = true
+            insecure = true
+          [worker.oci]
+            platforms = [ "linux/amd64" ]
+            reservedSpace = "60%"
+            maxUsedSpace = "80%"
+            max-parallelism = 25
+      EOT
+      }
+    })
+  ]
+
+  depends_on = [
+    kubernetes_namespace_v1.app,
+    time_sleep.ingress_nginx_controller,
+  ]
+}
+
 resource "helm_release" "app_postgres" {
   count = var.app_postgres_enabled ? 1 : 0
 
@@ -126,11 +176,6 @@ resource "helm_release" "app_distribution" {
           "nginx.ingress.kubernetes.io/proxy-body-size" = "0"
         }
       }
-      #   service = {
-      #     extraPorts = [
-      #       "5000"
-      #     ]
-      #   }
     })
   ]
 
