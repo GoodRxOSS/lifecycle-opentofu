@@ -48,7 +48,7 @@ resource "helm_release" "app_lifecycle" {
   name             = "lifecycle"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle"
-  version          = "0.1.0"
+  version          = "0.2.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -56,16 +56,14 @@ resource "helm_release" "app_lifecycle" {
     yamlencode({
       global = {
         domain = var.app_domain
-      }
-      distribution = {
-        ingress = {
-          hostname = "distribution.${var.app_domain}"
+        image = {
+          tag = "alpha"
         }
       }
       buildkit = {
         buildkitdToml = <<-EOT
           debug = true
-          [registry."distribution.${var.app_domain}"]
+          [registry."lifecycle-distribution.${kubernetes_namespace_v1.app.metadata[0].name}.svc.cluster.local"]
             http = true
             insecure = true
           [worker.oci]
