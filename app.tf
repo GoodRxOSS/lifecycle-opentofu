@@ -48,7 +48,7 @@ resource "helm_release" "app_lifecycle" {
   name             = "lifecycle"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle"
-  version          = "0.2.0"
+  version          = "0.3.2"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -72,6 +72,11 @@ resource "helm_release" "app_lifecycle" {
             maxUsedSpace = "80%"
             max-parallelism = 25
       EOT
+      }
+      distribution = {
+        ingress = {
+          hostname = format("%s.%s", var.app_distribution_subdomain, var.app_domain)
+        }
       }
     })
   ]
