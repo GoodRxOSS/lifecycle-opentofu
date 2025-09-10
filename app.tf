@@ -48,7 +48,7 @@ resource "helm_release" "app_lifecycle" {
   name             = "lifecycle"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle"
-  version          = "0.3.2"
+  version          = "0.3.3"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -57,7 +57,7 @@ resource "helm_release" "app_lifecycle" {
       global = {
         domain = var.app_domain
         image = {
-          tag = "alpha"
+          tag = "0.1.3"
         }
       }
       buildkit = {
