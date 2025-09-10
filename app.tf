@@ -73,11 +73,6 @@ resource "helm_release" "app_lifecycle" {
             max-parallelism = 25
       EOT
       }
-      distribution = {
-        ingress = {
-          hostname = format("%s.%s", var.app_distribution_subdomain, var.app_domain)
-        }
-      }
     })
   ]
 
