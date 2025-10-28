@@ -260,22 +260,3 @@ resource "kubernetes_secret_v1" "app_redis" {
     )
   }
 }
-
-resource "kubernetes_config_map_v1" "app_config" {
-  metadata {
-    name      = "app-config"
-    namespace = var.app_namespace
-  }
-
-  data = {
-    APP_HOST = (var.app_enabled
-      ? format("https://%s.%s", var.app_subdomain, var.app_domain)
-      : null
-    )
-
-    DISTRIBUTION_HOST = (var.app_distribution_enabled
-      ? format("https://%s.%s", var.app_distribution_subdomain, var.app_domain)
-      : null
-    )
-  }
-}
