@@ -57,7 +57,7 @@ resource "helm_release" "app_lifecycle" {
       global = {
         domain = var.app_domain
         image = {
-          tag = "0.1.3"
+          tag = "0.1.4"
         }
       }
       buildkit = {
