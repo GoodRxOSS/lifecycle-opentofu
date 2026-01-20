@@ -269,3 +269,27 @@ resource "kubectl_manifest" "letsencrypt_dns_certificate" {
     kubectl_manifest.letsencrypt_dns_clusterissuer,
   ]
 }
+
+resource "helm_release" "keycloak_operator" {
+  count = var.keycloak_operator_enabled ? 1 : 0
+
+  name             = "keycloak-operator"
+  repository       = "oci://ghcr.io/goodrxoss/helm-charts"
+  chart            = "keycloak-operator"
+  version          = "0.1.0"
+  namespace        = "keycloak"
+  create_namespace = true
+
+  values = [
+    yamlencode({
+      watchNamespaces = [
+        "keycloak",
+        kubernetes_namespace_v1.app.metadata[0].name,
+      ]
+    })
+  ]
+
+  depends_on = [
+    kubernetes_namespace_v1.app
+  ]
+}
