@@ -31,7 +31,7 @@ No modules.
 | [aws_iam_role.ebs_csi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.eso](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.node_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy.eso_secrets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.eso_secrets_manager](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy_attachment.cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.ebs_csi](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.node_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -57,7 +57,7 @@ No modules.
 | <a name="input_cluster_min_size"></a> [cluster\_min\_size](#input\_cluster\_min\_size) | The minimum number of nodes in the EKS node group.<br/>    Cluster autoscaler or node group logic will not scale below this value. | `number` | `1` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the Amazon EKS cluster.<br/>Used to identify the cluster across AWS services and Terraform resources.<br/>Must consist of alphanumeric characters, dashes, and be 1–100 characters long. | `string` | `"eks-cluster"` | no |
 | <a name="input_cluster_version"></a> [cluster\_version](#input\_cluster\_version) | The Kubernetes version to use for the EKS control plane.<br/>If not specified, AWS will use the default version.<br/>Example valid values: "1.27", "1.28", "1.29" | `string` | `null` | no |
-| <a name="input_enable_external_secrets"></a> [enable\_external\_secrets](#input\_enable\_external\_secrets) | Enable IRSA role for External Secrets Operator. | `bool` | `true` | no |
+| <a name="input_external_secrets_enabled"></a> [external\_secrets\_enabled](#input\_external\_secrets\_enabled) | Enable IAM role for External Secrets Operator. | `bool` | `false` | no |
 | <a name="input_external_secrets_namespace"></a> [external\_secrets\_namespace](#input\_external\_secrets\_namespace) | Namespace where External Secrets Operator is installed. | `string` | `"external-secrets"` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | The CIDR block for the VPC to be used by the EKS cluster.<br/>Must be a valid CIDR notation (e.g., 10.0.0.0/16). | `string` | `"172.32.0.0/16"` | no |
 | <a name="input_vpc_subnets"></a> [vpc\_subnets](#input\_vpc\_subnets) | A map of subnet names to CIDR blocks used within the VPC.<br/>These subnets should be in separate availability zones to enable high availability. | `map(string)` | <pre>{<br/>  "a": "172.32.0.0/20",<br/>  "b": "172.32.16.0/20",<br/>  "c": "172.32.32.0/20"<br/>}</pre> | no |
@@ -70,5 +70,5 @@ No modules.
 | <a name="output_cluster_endpoint"></a> [cluster\_endpoint](#output\_cluster\_endpoint) | The public endpoint of the EKS cluster's Kubernetes API server.<br/>This value is required to configure `kubectl` or other Kubernetes clients to access the cluster. |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The unique identifier (ID) of the AWS EKS cluster.<br/>Typically used to reference the cluster in scripts or cross-module resources. |
 | <a name="output_cluster_token"></a> [cluster\_token](#output\_cluster\_token) | A temporary authentication token used to access the EKS Kubernetes API.<br/>This token is valid for 15 minutes and should be treated as sensitive.<br/>Typically used as a Bearer token in Kubernetes client configuration. |
-| <a name="output_eso_role_arn"></a> [eso\_role\_arn](#output\_eso\_role\_arn) | ARN of the IAM role for External Secrets Operator.<br/>Used to configure IRSA for the ESO service account. |
+| <a name="output_eso_role_arn"></a> [eso\_role\_arn](#output\_eso\_role\_arn) | ARN of the IAM role for External Secrets Operator. |
 <!-- END_TF_DOCS -->

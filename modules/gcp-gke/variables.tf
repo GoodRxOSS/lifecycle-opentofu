@@ -42,9 +42,9 @@ variable "cluster_name" {
   EOT
 }
 
-variable "enable_external_secrets" {
-  type        = bool
-  default     = true
+variable "external_secrets_enabled" {
+  type    = bool
+  default = false
 
   description = <<-EOT
     Enable Workload Identity for External Secrets Operator.
@@ -52,8 +52,8 @@ variable "enable_external_secrets" {
 }
 
 variable "external_secrets_namespace" {
-  type        = string
-  default     = "external-secrets"
+  type    = string
+  default = "external-secrets"
 
   description = <<-EOT
     Namespace where External Secrets Operator is installed.

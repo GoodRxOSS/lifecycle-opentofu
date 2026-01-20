@@ -237,3 +237,12 @@ variable "ssh_public_key_path" {
     EOT
   }
 }
+
+variable "external_secrets_enabled" {
+  type    = bool
+  default = false
+
+  description = <<-EOT
+    Enable Application Credential for External Secrets Operator.
+  EOT
+}

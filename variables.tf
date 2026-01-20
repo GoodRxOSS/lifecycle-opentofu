@@ -595,14 +595,17 @@ variable "app_lifecycle_ui" {
   default     = false
   description = <<-EOT
     Toggle to control whether Lifecycle UI is deployed.
-variable "enable_external_secrets" {
-  type        = bool
-  default     = true
+  EOT
+}
+
+variable "external_secrets_enabled" {
+  type    = bool
+  default = true
 
   description = <<-EOT
     Enable External Secrets Operator for cloud secrets integration.
     When enabled, ESO will be installed and configured with the appropriate
-    ClusterSecretStore for the cluster provider (AWS or GCP).
+    ClusterSecretStore for the cluster provider (AWS, GCP or OpenStack).
   EOT
 }
 
@@ -627,7 +630,7 @@ variable "external_secrets_namespace" {
 
 variable "external_secrets_chart_version" {
   type    = string
-  default = "0.10.0"
+  default = "2.1.0"
 
   description = <<-EOT
     External Secrets Operator Helm chart version.

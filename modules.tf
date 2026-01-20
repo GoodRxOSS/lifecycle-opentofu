@@ -24,7 +24,7 @@ module "eks" {
   }
 
   cluster_name               = var.cluster_name
-  enable_external_secrets    = var.enable_external_secrets
+  external_secrets_enabled   = var.external_secrets_enabled
   external_secrets_namespace = var.external_secrets_namespace
 }
 
@@ -39,7 +39,7 @@ module "gke" {
 
   gcp_region                 = var.gcp_region
   cluster_name               = var.cluster_name
-  enable_external_secrets    = var.enable_external_secrets
+  external_secrets_enabled   = var.external_secrets_enabled
   external_secrets_namespace = var.external_secrets_namespace
 }
 
@@ -52,11 +52,12 @@ module "magnum" {
     openstack = openstack.alias["0"]
   }
 
-  region              = var.openstack_region
-  project             = var.openstack_project
-  cluster_name        = var.cluster_name
-  ssh_public_key      = var.ssh_public_key
-  ssh_public_key_path = var.ssh_public_key_path
+  region                   = var.openstack_region
+  project                  = var.openstack_project
+  cluster_name             = var.cluster_name
+  ssh_public_key           = var.ssh_public_key
+  ssh_public_key_path      = var.ssh_public_key_path
+  external_secrets_enabled = var.external_secrets_enabled
 }
 
 module "route53" {

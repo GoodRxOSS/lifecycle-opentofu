@@ -34,7 +34,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the GKE cluster.<br/>This value is used to identify the cluster within GCP and should be unique<br/>within the selected project and region.<br/>Example: "application-gke" | `string` | `"application-gke"` | no |
-| <a name="input_enable_external_secrets"></a> [enable\_external\_secrets](#input\_enable\_external\_secrets) | Enable Workload Identity for External Secrets Operator. | `bool` | `true` | no |
+| <a name="input_external_secrets_enabled"></a> [external\_secrets\_enabled](#input\_external\_secrets\_enabled) | Enable Workload Identity for External Secrets Operator. | `bool` | `false` | no |
 | <a name="input_external_secrets_namespace"></a> [external\_secrets\_namespace](#input\_external\_secrets\_namespace) | Namespace where External Secrets Operator is installed. | `string` | `"external-secrets"` | no |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | The Google Cloud region or zone where the GKE cluster is deployed.<br/>Example: "us-central1" or "us-central1-b" | `string` | `"us-central1-b"` | no |
 

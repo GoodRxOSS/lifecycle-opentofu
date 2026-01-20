@@ -53,7 +53,7 @@ output "cluster_token" {
 }
 
 output "eso_service_account_email" {
-  value = var.enable_external_secrets ? one(google_service_account.eso[*].email) : null
+  value = var.external_secrets_enabled ? one(google_service_account.eso[*].email) : null
 
   description = <<-EOT
     Email of the GCP service account for External Secrets Operator.

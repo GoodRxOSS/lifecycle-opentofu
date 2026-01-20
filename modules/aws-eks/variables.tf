@@ -140,18 +140,18 @@ variable "cluster_min_size" {
   }
 }
 
-variable "enable_external_secrets" {
-  type        = bool
-  default     = true
+variable "external_secrets_enabled" {
+  type    = bool
+  default = false
 
   description = <<-EOT
-    Enable IRSA role for External Secrets Operator.
+    Enable IAM role for External Secrets Operator.
   EOT
 }
 
 variable "external_secrets_namespace" {
-  type        = string
-  default     = "external-secrets"
+  type    = string
+  default = "external-secrets"
 
   description = <<-EOT
     Namespace where External Secrets Operator is installed.

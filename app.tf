@@ -68,7 +68,7 @@ resource "helm_release" "app_lifecycle" {
   name             = "lifecycle"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle"
-  version          = "0.7.0"
+  version          = "0.8.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -85,7 +85,11 @@ resource "helm_release" "app_lifecycle" {
       global = {
         domain = var.app_domain
         image = {
-          tag = "0.1.11"
+          tag        = "alpha"
+          pullPolicy = "IfNotPresent"
+        }
+        security = {
+          allowInsecureImages = true
         }
       }
 
@@ -151,10 +155,18 @@ resource "helm_release" "app_lifecycle" {
       }
 
       ui = {
+        image = {
+          tag        = "alpha"
+          pullPolicy = "IfNotPresent"
+        }
         config = {
           apiUrl      = format("https://app.%s", var.app_domain)
           authBaseUrl = format("https://auth.%s", var.app_domain)
         }
+      }
+
+      minio = {
+        enabled = true
       }
 
       keycloak = merge(

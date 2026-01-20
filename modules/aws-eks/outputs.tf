@@ -53,10 +53,9 @@ output "cluster_token" {
 }
 
 output "eso_role_arn" {
-  value = var.enable_external_secrets ? one(aws_iam_role.eso[*].arn) : null
+  value = var.external_secrets_enabled ? one(aws_iam_role.eso[*].arn) : null
 
   description = <<-EOT
     ARN of the IAM role for External Secrets Operator.
-    Used to configure IRSA for the ESO service account.
   EOT
 }

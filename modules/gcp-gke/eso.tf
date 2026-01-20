@@ -14,7 +14,7 @@
 
 # Service account for External Secrets Operator
 resource "google_service_account" "eso" {
-  count = var.enable_external_secrets ? 1 : 0
+  count = var.external_secrets_enabled ? 1 : 0
 
   account_id   = format("%s-eso", var.cluster_name)
   display_name = format("External Secrets Operator for %s", var.cluster_name)
@@ -22,18 +22,18 @@ resource "google_service_account" "eso" {
 
 # Grant Secret Manager access
 resource "google_project_iam_member" "eso_secret_accessor" {
-  count = var.enable_external_secrets ? 1 : 0
+  count = var.external_secrets_enabled ? 1 : 0
 
   project = data.google_project.this.project_id
   role    = "roles/secretmanager.secretAccessor"
-  member  = format("serviceAccount:%s", google_service_account.eso[0].email)
+  member  = format("serviceAccount:%s", one(google_service_account.eso[*].email))
 }
 
 # Workload Identity binding
 resource "google_service_account_iam_member" "eso_workload_identity" {
-  count = var.enable_external_secrets ? 1 : 0
+  count = var.external_secrets_enabled ? 1 : 0
 
-  service_account_id = google_service_account.eso[0].name
+  service_account_id = one(google_service_account.eso[*].name)
   role               = "roles/iam.workloadIdentityUser"
   member = format("serviceAccount:%s.svc.id.goog[%s/external-secrets]",
     data.google_project.this.project_id,

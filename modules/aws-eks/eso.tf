@@ -14,7 +14,7 @@
 
 # IRSA role for External Secrets Operator
 resource "aws_iam_role" "eso" {
-  count = var.enable_external_secrets ? 1 : 0
+  count = var.external_secrets_enabled ? 1 : 0
 
   name = format("%s-eso", var.cluster_name)
 
@@ -37,11 +37,11 @@ resource "aws_iam_role" "eso" {
   })
 }
 
-resource "aws_iam_role_policy" "eso_secrets" {
-  count = var.enable_external_secrets ? 1 : 0
+resource "aws_iam_role_policy" "eso_secrets_manager" {
+  count = var.external_secrets_enabled ? 1 : 0
 
-  name = "secrets-manager-access"
-  role = aws_iam_role.eso[0].id
+  name = "secrets-manager-get-list"
+  role = one(aws_iam_role.eso[*].id)
 
   policy = jsonencode({
     Version = "2012-10-17"
