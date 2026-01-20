@@ -269,3 +269,100 @@ resource "kubectl_manifest" "letsencrypt_dns_certificate" {
     kubectl_manifest.letsencrypt_dns_clusterissuer,
   ]
 }
+
+# External Secrets Operator
+resource "helm_release" "external_secrets" {
+  count = var.enable_external_secrets ? 1 : 0
+
+  name             = "external-secrets"
+  repository       = "https://charts.external-secrets.io"
+  chart            = "external-secrets"
+  version          = var.external_secrets_chart_version
+  namespace        = var.external_secrets_namespace
+  create_namespace = true
+
+  values = [
+    yamlencode({
+      serviceAccount = {
+        annotations = (
+          local.is_eks ? {
+            "eks.amazonaws.com/role-arn" = one(module.eks[*].eso_role_arn)
+          } :
+          local.is_gke ? {
+            "iam.gke.io/gcp-service-account" = one(module.gke[*].eso_service_account_email)
+          } :
+          {}
+        )
+      }
+    })
+  ]
+
+  depends_on = [
+    module.eks,
+    module.gke
+  ]
+}
+
+# ClusterSecretStore for AWS
+resource "kubectl_manifest" "cluster_secret_store_aws" {
+  count = var.enable_external_secrets && local.is_eks ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "external-secrets.io/v1beta1"
+    kind       = "ClusterSecretStore"
+    metadata = {
+      name = "aws-secretsmanager"
+    }
+    spec = {
+      provider = {
+        aws = {
+          service = "SecretsManager"
+          region  = var.aws_region
+          auth = {
+            jwt = {
+              serviceAccountRef = {
+                name      = "external-secrets"
+                namespace = var.external_secrets_namespace
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  depends_on = [helm_release.external_secrets]
+}
+
+# ClusterSecretStore for GCP
+resource "kubectl_manifest" "cluster_secret_store_gcp" {
+  count = var.enable_external_secrets && local.is_gke ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "external-secrets.io/v1beta1"
+    kind       = "ClusterSecretStore"
+    metadata = {
+      name = "gcp-secretmanager"
+    }
+    spec = {
+      provider = {
+        gcpsm = {
+          projectID = var.gcp_project
+          auth = {
+            workloadIdentity = {
+              clusterLocation  = var.gcp_region
+              clusterName      = var.cluster_name
+              clusterProjectID = var.gcp_project
+              serviceAccountRef = {
+                name      = "external-secrets"
+                namespace = var.external_secrets_namespace
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  depends_on = [helm_release.external_secrets]
+}

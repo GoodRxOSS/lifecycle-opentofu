@@ -51,3 +51,12 @@ output "cluster_token" {
     Typically used as a Bearer token in Kubernetes client configuration.
   EOT
 }
+
+output "eso_role_arn" {
+  value = var.enable_external_secrets ? one(aws_iam_role.eso[*].arn) : null
+
+  description = <<-EOT
+    ARN of the IAM role for External Secrets Operator.
+    Used to configure IRSA for the ESO service account.
+  EOT
+}
