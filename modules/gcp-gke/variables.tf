@@ -41,3 +41,21 @@ variable "cluster_name" {
     Example: "application-gke"
   EOT
 }
+
+variable "enable_external_secrets" {
+  type        = bool
+  default     = true
+
+  description = <<-EOT
+    Enable Workload Identity for External Secrets Operator.
+  EOT
+}
+
+variable "external_secrets_namespace" {
+  type        = string
+  default     = "external-secrets"
+
+  description = <<-EOT
+    Namespace where External Secrets Operator is installed.
+  EOT
+}

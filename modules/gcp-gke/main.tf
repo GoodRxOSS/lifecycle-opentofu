@@ -33,6 +33,10 @@ resource "google_container_cluster" "this" {
   initial_node_count       = 1
   deletion_protection      = false
 
+  workload_identity_config {
+    workload_pool = "${data.google_project.this.project_id}.svc.id.goog"
+  }
+
   node_config {
     disk_size_gb = 20
     disk_type    = "pd-standard"
@@ -67,6 +71,10 @@ resource "google_container_node_pool" "default" {
     machine_type = "e2-medium"
     disk_size_gb = 30
     disk_type    = "pd-balanced"
+
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
 
     service_account = google_service_account.this.email
     oauth_scopes = [

@@ -51,3 +51,12 @@ output "cluster_token" {
     typically passed as a Bearer token in client requests. Marked as sensitive.
   EOT
 }
+
+output "eso_service_account_email" {
+  value = var.enable_external_secrets ? one(google_service_account.eso[*].email) : null
+
+  description = <<-EOT
+    Email of the GCP service account for External Secrets Operator.
+    Used to configure Workload Identity for the ESO service account.
+  EOT
+}

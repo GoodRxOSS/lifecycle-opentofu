@@ -139,3 +139,21 @@ variable "cluster_min_size" {
     error_message = "Min size must be at least 1"
   }
 }
+
+variable "enable_external_secrets" {
+  type        = bool
+  default     = true
+
+  description = <<-EOT
+    Enable IRSA role for External Secrets Operator.
+  EOT
+}
+
+variable "external_secrets_namespace" {
+  type        = string
+  default     = "external-secrets"
+
+  description = <<-EOT
+    Namespace where External Secrets Operator is installed.
+  EOT
+}
