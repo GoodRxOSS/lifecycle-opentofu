@@ -321,3 +321,11 @@ variable "app_buildkit_enabled" {
     Toggle to control whether BuildKit is deployed (e.g., for image builds).
   EOT
 }
+
+variable "keycloak_operator_enabled" {
+  type        = bool
+  default     = true
+  description = <<-EOT
+    Toggle to control whether Keycloak Operator is deployed.
+  EOT
+}
