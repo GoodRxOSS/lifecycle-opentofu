@@ -23,7 +23,9 @@ module "eks" {
     aws = aws.alias["0"]
   }
 
-  cluster_name = var.cluster_name
+  cluster_name               = var.cluster_name
+  enable_external_secrets    = var.enable_external_secrets
+  external_secrets_namespace = var.external_secrets_namespace
 }
 
 module "gke" {
@@ -35,8 +37,10 @@ module "gke" {
     google = google.alias["0"]
   }
 
-  gcp_region   = var.gcp_region
-  cluster_name = var.cluster_name
+  gcp_region                 = var.gcp_region
+  cluster_name               = var.cluster_name
+  enable_external_secrets    = var.enable_external_secrets
+  external_secrets_namespace = var.external_secrets_namespace
 }
 
 module "route53" {

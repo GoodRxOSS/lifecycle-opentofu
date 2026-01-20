@@ -20,7 +20,7 @@ locals {
       disabled         = true                                         # if you need to temporarity deisable a service but keep the configuration
       namespace        = kubernetes_namespace_v1.app.metadata[0].name # kubernetes namespace to deploy to 
       name             = "default"                                    # alt name, if ommited, key of map will be used
-      image            = "gcr.io/kuar-demo/kuard-amd64:1"             # Docker image URL
+      image            = "ghcr.io/kubernetes-up-and-running/kuard-amd64:blue" # Docker image URL
       port             = "8080"                                       # common port for the service and container
       host             = format("%s.%s", "%s", var.app_domain)        # if no <app>.<host> specified, this hemplate will be used
       args             = []                                           # custom arguments for conteiner command
@@ -30,11 +30,11 @@ locals {
       tls              = true
     }
     kuard = {
-      image = "gcr.io/kuar-demo/kuard-amd64:1"
+      image = "ghcr.io/kubernetes-up-and-running/kuard-amd64:blue"
       port  = 8080
     }
     kuard-wildcard = {
-      image          = "gcr.io/kuar-demo/kuard-amd64:1"
+      image          = "ghcr.io/kubernetes-up-and-running/kuard-amd64:blue"
       port           = 8080
       host           = format("*.%s", var.app_domain)
       tls            = false
