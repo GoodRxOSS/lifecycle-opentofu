@@ -329,3 +329,19 @@ variable "keycloak_operator_enabled" {
     Toggle to control whether Keycloak Operator is deployed.
   EOT
 }
+
+variable "app_lifecycle_keycloak" {
+  type        = bool
+  default     = true
+  description = <<-EOT
+    Toggle to control whether Keycloak instance for Lifecycle is deployed.
+  EOT
+}
+
+variable "app_lifecycle_ui" {
+  type        = bool
+  default     = true
+  description = <<-EOT
+    Toggle to control whether Lifecycle UI is deployed.
+  EOT
+}
