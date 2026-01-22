@@ -57,7 +57,35 @@ resource "helm_release" "app_lifecycle" {
       global = {
         domain = var.app_domain
         image = {
-          tag = "0.1.4"
+          tag = "0.1.9-alpha.7"
+        }
+      }
+      components = {
+        web = {
+          deployment = {
+            extraEnv = [
+              {
+                name  = "LIFECYCLE_MODE"
+                value = "web"
+              },
+              {
+                name  = "KEYCLOAK_ISSUER"
+                value = format("https://keycloak.%s/realms/lifecycle", var.app_domain)
+              },
+              {
+                name  = "KEYCLOAK_CLIENT_ID"
+                value = "lifecycle-core"
+              },
+              {
+                name  = "KEYCLOAK_JWKS_URL"
+                value = format("https://keycloak.%s/realms/lifecycle/protocol/openid-connect/certs", var.app_domain)
+              },
+              { # CORS
+                name  = "ALLOWED_ORIGINS"
+                value = format("https://ui.%s", var.app_domain)
+              },
+            ]
+          }
         }
       }
       buildkit = {
@@ -259,4 +287,90 @@ resource "kubernetes_secret_v1" "app_redis" {
       var.app_redis_port,
     )
   }
+}
+
+resource "helm_release" "app_lifecycle_keycloak" {
+  count = var.app_lifecycle_keycloak ? 1 : 0
+
+  name             = "lifecycle-keycloak"
+  repository       = "oci://ghcr.io/goodrxoss/helm-charts"
+  chart            = "lifecycle-keycloak"
+  version          = "0.1.0"
+  namespace        = kubernetes_namespace_v1.app.metadata[0].name
+  create_namespace = false
+
+  values = [
+    yamlencode({
+      hostname = format("https://keycloak.%s", var.app_domain)
+
+      clients = {
+        lifecycleUi = {
+          url = format("https://ui.%s", var.app_domain)
+        }
+      }
+
+      githubIdp = {
+        clientId = {
+          secretKeyRef = {
+            name = "lifecycle-bootstrap"
+            key  = "GITHUB_CLIENT_ID"
+          }
+        }
+        clientSecret = {
+          secretKeyRef = {
+            name = "lifecycle-bootstrap"
+            key  = "GITHUB_CLIENT_SECRET"
+          }
+        }
+      }
+    })
+  ]
+
+  depends_on = [
+    kubernetes_namespace_v1.app,
+    helm_release.app_lifecycle,
+  ]
+}
+
+resource "helm_release" "lifecycle_ui" {
+  name             = "lifecycle-ui"
+  repository       = "oci://ghcr.io/goodrxoss/helm-charts"
+  chart            = "lifecycle-ui"
+  version          = "0.1.1"
+  namespace        = kubernetes_namespace_v1.app.metadata[0].name
+  create_namespace = false
+
+  values = [
+    yamlencode({
+      image = {
+        tag = "0.1.1-alpha.2"
+      }
+      global = {
+        domain      = var.app_domain
+        uiSubDomain = "ui"
+      }
+
+      config = {
+        nextPublicApiUrl          = format("https://app.%s", var.app_domain)
+        apiUrl                    = format("https://app.%s", var.app_domain)
+        nextPublicKeycloakBaseUrl = format("https://keycloak.%s", var.app_domain)
+        keycloakBaseUrl           = format("https://keycloak.%s", var.app_domain)
+        nextPublicKeycloakRealm   = "lifecycle"
+        keycloakRealm             = "lifecycle"
+        keycloakClientId          = "lifecycle-ui"
+        keycloakServiceClientId   = "lifecycle-ui-backend"
+
+      }
+
+      secrets = {
+        keycloakClientSecret        = "lifecycle-ui-secret"
+        keycloakServiceClientSecret = "lifecycle-ui-backend-secret"
+      }
+    })
+  ]
+
+  depends_on = [
+    kubernetes_namespace_v1.app,
+    helm_release.app_lifecycle_keycloak,
+  ]
 }
