@@ -29,9 +29,15 @@ data "cloudflare_zone" "this" {
 
 resource "cloudflare_dns_record" "this" {
   zone_id = data.cloudflare_zone.this.zone_id
-  name    = format("%s.%s", var.dns_record_name, var.dns_domain)
+
+  name = (
+    var.dns_record_name == null || var.dns_record_name == ""
+    ? var.dns_domain
+    : format("%s.%s", var.dns_record_name, var.dns_domain)
+  )
+
   type    = var.dns_record_type
-  proxied = false
+  proxied = var.dns_proxied
   ttl     = var.dns_ttl
   content = var.dns_record_value
 }

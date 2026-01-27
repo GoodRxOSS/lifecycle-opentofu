@@ -74,6 +74,7 @@ module "cloudflare" {
   source = "./modules/cloudflare-dns"
 
   dns_domain       = var.app_domain
+  dns_record_name  = "*"
   dns_record_type  = local.public_endpoint.record_type
   dns_record_value = local.public_endpoint.record_value
 }

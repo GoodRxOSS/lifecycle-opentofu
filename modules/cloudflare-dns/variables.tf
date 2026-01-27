@@ -17,28 +17,29 @@ variable "dns_domain" {
 
   description = <<-EOT
     The DNS domain name under which the DNS record will be created.
-    Example: "example.com"
+    Example: "example.com" or "app.example.com"
   EOT
 
   validation {
     condition     = can(regex("^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}$", var.dns_domain))
-    error_message = "dns_domain must be a valid domain name, e.g. example.com"
+    error_message = "dns_domain must be a valid domain name, e.g. example.com or app.example.com"
   }
 }
 
 variable "dns_record_name" {
   type    = string
-  default = "*"
+  default = null
 
   description = <<-EOT
-    The DNS record name (subdomain or hostname) to create or manage.
-    Example: "www" or "app"
-    Defaults to "*"
+    Subdomain or hostname. Use "*" for wildcard. 
+    If null, the record is created for the root dns_domain.
   EOT
 
   validation {
-    condition     = can(regex("^([a-zA-Z0-9-_*]{1,63})$", var.dns_record_name))
-    error_message = "dns_record_name must be 1-63 characters long and contain only letters, digits, hyphens, or underscores"
+    condition = (
+      var.dns_record_name == null ? true : can(regex("^[a-zA-Z0-9-_.*]{1,63}$", var.dns_record_name))
+    )
+    error_message = "dns_record_name contains invalid characters or is too long."
   }
 }
 
@@ -79,7 +80,7 @@ variable "dns_record_type" {
 
 variable "dns_ttl" {
   type    = number
-  default = 1
+  default = 60
 
   description = <<-EOT
     The TTL (time to live) for the DNS record in seconds.
@@ -91,4 +92,15 @@ variable "dns_ttl" {
     condition     = var.dns_ttl > 0 && var.dns_ttl <= 86400
     error_message = "dns_ttl must be a positive integer between 1 and 86400 seconds"
   }
+}
+
+variable "dns_proxied" {
+  type    = bool
+  default = false
+
+  description = <<-EOT
+    Whether the record gets the Cloudflare 'orange cloud' (true) or is just a regular DNS record (false). 
+    If true, traffic is routed through the Cloudflare network, enabling features like WAF, CDN, and DDoS protection.
+    Note: Proxied records must use a TTL ("var.dns_ttl") of 1 (automatic).
+  EOT
 }
