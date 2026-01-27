@@ -27,6 +27,53 @@ variable "cloudflare_api_token" {
   }
 }
 
+variable "cloudflare_tunnel_enabled" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Controls whether to create and deploy the Cloudflare Tunnel resources.
+  EOT
+}
+
+variable "cloudflare_tunnel_name" {
+  type        = string
+  default     = "lifecycle"
+  description = <<-EOT
+    The display name of the Cloudflare Tunnel.
+    Used to identify the tunnel in the Zero Trust dashboard.
+  EOT
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9_-]{1,63}$", var.cloudflare_tunnel_name))
+    error_message = <<-EOT
+      cloudflare_tunnel_name must be 1-63 characters long and 
+      can only contain letters, numbers, underscores, and hyphens.
+    EOT
+  }
+}
+
+variable "cloudflare_tunnel_domain" {
+  type        = string
+  default     = null
+  description = <<-EOT
+    The domain name for the tunnel's ingress rules.
+    If null, 'var.app_domain' will be used as a fallback.
+  EOT
+
+  validation {
+    condition = (
+      var.cloudflare_tunnel_domain == null
+      ? true
+      : can(regex("^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}$",
+        var.cloudflare_tunnel_domain)
+      )
+    )
+    error_message = <<-EOT
+      cloudflare_tunnel_domain must be a valid domain name (e.g., dev.example.com).
+    EOT
+  }
+}
+
 variable "gcp_region" {
   type    = string
   default = "us-central1-b"
