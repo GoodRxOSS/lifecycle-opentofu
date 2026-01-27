@@ -218,6 +218,48 @@ variable "cluster_name" {
   }
 }
 
+
+variable "private_registries" {
+  type = list(object({
+    url      = string
+    username = string
+    password = string
+    usage    = list(string) # ["charts", "images"]
+  }))
+  default   = []
+  sensitive = true
+
+  description = <<-EOT
+    Configuration for private registries (Helm charts and Container images).
+    If empty, no registry blocks will be created.
+  EOT
+
+  validation {
+    condition = alltrue([
+      for r in var.private_registries : (
+        can(regex("^([a-zA-Z0-9.-]+(:[0-9]+)?)$", r.url)) &&
+        length(r.username) > 0 &&
+        length(r.password) > 0
+      )
+    ])
+    error_message = <<-EOT
+      Invalid private registry configuration.
+      Requirements:
+      - url must be a valid domain or IP (e.g., 'ghcr.io', 'index.docker.io', '10.0.0.1:5000') without protocol.
+      - username and password cannot be empty.
+    EOT
+  }
+
+  validation {
+    condition = alltrue([
+      for r in var.private_registries : alltrue([
+        for u in r.usage : contains(["charts", "images"], u)
+      ])
+    ])
+    error_message = "The 'usage' field must only contain 'charts' and/or 'images'."
+  }
+}
+
 variable "app_namespace" {
   type    = string
   default = "application-env"

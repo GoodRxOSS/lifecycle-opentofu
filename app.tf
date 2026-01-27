@@ -42,6 +42,33 @@ resource "time_sleep" "ingress_nginx_controller" {
   create_duration = "60s"
 }
 
+resource "kubernetes_secret" "image_pull_secret" {
+  count = length([
+    for v in var.private_registries : v if contains(v.usage, "images")
+  ]) > 0 ? 1 : 0
+
+  type = "kubernetes.io/dockerconfigjson"
+  metadata {
+    name      = "image-pull-secret"
+    namespace = kubernetes_namespace_v1.app.metadata[0].name
+  }
+
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        for v in var.private_registries :
+        v.url => {
+          auth = base64encode(format("%s:%s", v.username, v.password))
+        } if contains(v.usage, "images")
+      }
+    })
+  }
+
+  depends_on = [
+    kubernetes_namespace_v1.app,
+  ]
+}
+
 resource "helm_release" "app_lifecycle" {
   count = var.app_lifecycle_enabled ? 1 : 0
 
@@ -51,6 +78,14 @@ resource "helm_release" "app_lifecycle" {
   version          = "0.3.3"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
+
+  dynamic "set" {
+    for_each = kubernetes_secret.image_pull_secret
+    content {
+      name  = "global.imagePullSecrets[0].name"
+      value = set.value.metadata[0].name
+    }
+  }
 
   values = [
     yamlencode({
@@ -339,6 +374,14 @@ resource "helm_release" "lifecycle_ui" {
   version          = "0.1.1"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
+
+  dynamic "set" {
+    for_each = kubernetes_secret.image_pull_secret
+    content {
+      name  = "imagePullSecrets[0].name"
+      value = set.value.metadata[0].name
+    }
+  }
 
   values = [
     yamlencode({
