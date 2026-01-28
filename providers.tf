@@ -64,4 +64,16 @@ provider "helm" {
     cluster_ca_certificate = local.cluster.ca_certificate
     token                  = local.cluster.token
   }
+
+  dynamic "registry" {
+    for_each = [
+      for v in var.private_registries : v if contains(v.usage, "charts")
+    ]
+
+    content {
+      url      = format("oci://%s", registry.value.url)
+      username = registry.value.username
+      password = registry.value.password
+    }
+  }
 }
