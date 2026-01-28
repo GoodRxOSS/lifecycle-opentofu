@@ -92,34 +92,40 @@ resource "helm_release" "app_lifecycle" {
       global = {
         domain = var.app_domain
         image = {
-          tag = "0.1.9-alpha.7"
+          tag = "0.1.9"
         }
       }
       components = {
         web = {
           deployment = {
-            extraEnv = [
-              {
-                name  = "LIFECYCLE_MODE"
-                value = "web"
-              },
-              {
-                name  = "KEYCLOAK_ISSUER"
-                value = format("https://keycloak.%s/realms/lifecycle", var.app_domain)
-              },
-              {
-                name  = "KEYCLOAK_CLIENT_ID"
-                value = "lifecycle-core"
-              },
-              {
-                name  = "KEYCLOAK_JWKS_URL"
-                value = format("https://keycloak.%s/realms/lifecycle/protocol/openid-connect/certs", var.app_domain)
-              },
-              { # CORS
-                name  = "ALLOWED_ORIGINS"
-                value = format("https://ui.%s", var.app_domain)
-              },
-            ]
+            extraEnv = concat(
+              [
+                {
+                  name  = "LIFECYCLE_MODE"
+                  value = "web"
+                },
+                { # CORS
+                  name  = "ALLOWED_ORIGINS"
+                  value = format("https://ui.%s", var.app_domain)
+                },
+              ],
+              var.app_lifecycle_keycloak ? [
+                {
+                  name  = "KEYCLOAK_ISSUER"
+                  value = format("https://keycloak.%s/realms/lifecycle", var.app_domain)
+                },
+                {
+                  name  = "KEYCLOAK_CLIENT_ID"
+                  value = "lifecycle-core"
+                },
+                {
+                  name = "KEYCLOAK_JWKS_URL"
+                  value = format("http://lifecycle-keycloak-service.%s.svc.cluster.local:8080/realms/lifecycle/protocol/openid-connect/certs",
+                    kubernetes_namespace_v1.app.metadata[0].name,
+                  )
+                }
+              ] : []
+            )
           }
         }
       }
@@ -330,7 +336,7 @@ resource "helm_release" "app_lifecycle_keycloak" {
   name             = "lifecycle-keycloak"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-keycloak"
-  version          = "0.1.0"
+  version          = "0.1.1"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -386,7 +392,7 @@ resource "helm_release" "lifecycle_ui" {
   values = [
     yamlencode({
       image = {
-        tag = "0.1.1-alpha.2"
+        tag = "0.1.1-alpha.4"
       }
       global = {
         domain      = var.app_domain
