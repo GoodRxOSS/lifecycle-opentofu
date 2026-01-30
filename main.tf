@@ -65,7 +65,10 @@ resource "helm_release" "ingress_nginx_controller" {
           default-ssl-certificate = format("%s/wildcard.%s", var.app_namespace, var.app_domain)
         }
         config = {
-          annotations-risk-level = "Critical"
+          annotations-risk-level  = "Critical"
+          proxy-buffer-size       = "16k"
+          proxy-buffers-number    = "8"
+          proxy-busy-buffers-size = "32k"
         }
         publishService = {
           enabled = true
