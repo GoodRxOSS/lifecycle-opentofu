@@ -336,7 +336,7 @@ resource "helm_release" "app_lifecycle_keycloak" {
   name             = "lifecycle-keycloak"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-keycloak"
-  version          = "0.1.1"
+  version          = "0.1.2"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
