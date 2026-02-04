@@ -1,4 +1,4 @@
-# Copyright 2025 GoodRx, Inc.
+# Copyright 2026 GoodRx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,38 +14,6 @@
 
 terraform {
   required_providers {
-    cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = "~> 5.0"
-    }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-    tls = {
-      source  = "hashicorp/tls"
-      version = "~> 4.0"
-    }
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 6.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "~> 1.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.0"
-    }
     openstack = {
       source  = "terraform-provider-openstack/openstack"
       version = "~> 3.0"

@@ -186,8 +186,8 @@ variable "cluster_provider" {
   default = "eks"
 
   validation {
-    condition     = contains(["gke", "eks"], var.cluster_provider)
-    error_message = "cluster_provider must be either 'gke' or 'eks'"
+    condition     = contains(["gke", "eks", "magnum"], var.cluster_provider)
+    error_message = "cluster_provider must be either 'gke' or 'eks' or 'magnum'"
   }
 }
 
@@ -218,6 +218,122 @@ variable "cluster_name" {
   }
 }
 
+variable "openstack_project" {
+  type        = string
+  default     = null
+  description = <<-EOT
+    The name of the OpenStack project (tenant). 
+    Must be URL-safe and follow corporate naming conventions.
+  EOT
+
+  validation {
+    condition = (
+      var.openstack_project == null || (
+        can(regex("^[a-z][a-z0-9-]{1,28}[a-z0-9]$", var.openstack_project)) &&
+        !contains(["admin", "services", "service", "demo"], lower(var.openstack_project))
+      )
+    )
+    error_message = <<EOT
+      The openstack_project name is invalid.
+      Requirements:
+      - 3 to 30 characters long.
+      - Start with a lowercase letter.
+      - Contain only lowercase letters, digits, or hyphens.
+      - Cannot end with a hyphen.
+      - Cannot be a reserved name (admin, services, service, demo).
+    EOT
+  }
+}
+
+variable "openstack_region" {
+  type        = string
+  default     = "RegionOne"
+  description = <<-EOT
+    The name of the OpenStack region. Standard default is RegionOne.
+  EOT
+
+  validation {
+    condition = (
+      can(regex("^[a-zA-Z0-9_-]{3,64}$", var.openstack_region))
+    )
+    error_message = <<EOT
+      The openstack_region name is invalid.
+      Requirements:
+      - 3 to 64 characters long.
+      - Can contain letters (a-z, A-Z), digits (0-9), hyphens (-), and underscores (_).
+      - Must match the region name defined in your OpenStack Keystone catalog.
+    EOT
+  }
+}
+
+variable "openstack_auth" {
+  type = object({
+    user_name = string
+    password  = string
+    auth_url  = string
+  })
+
+  default = {
+    user_name = ""
+    password  = ""
+    auth_url  = ""
+  }
+
+  description = <<-EOT
+    OpenStack authentication credentials. 
+    Includes user_name, password, and auth_url.
+  EOT
+
+  validation {
+    condition = (
+      length(var.openstack_auth.user_name) > 0 &&
+      length(var.openstack_auth.password) > 0 &&
+      can(regex("^https?://.+", var.openstack_auth.auth_url))
+    )
+    error_message = <<EOT
+      The openstack_auth variables are invalid:
+      - user_name and password cannot be empty.
+      - auth_url must be a valid URL starting with http:// or https://.
+    EOT
+  }
+}
+
+variable "ssh_public_key" {
+  type        = string
+  default     = null
+  description = <<-EOT
+    The content of the SSH public key (e.g., contents of ~/.ssh/id_rsa.pub). 
+    Supports RSA, ECDSA, and ED25519 formats.
+  EOT
+
+  validation {
+    condition = (
+      var.ssh_public_key == null ||
+      can(regex("^(ssh-(rsa|ed25519|ecdsa-sha2-nistp256|sha2-nistp384|sha2-nistp521)) [A-Za-z0-9+/]+[=]{0,3}( .+)?$", var.ssh_public_key))
+    )
+    error_message = <<EOT
+      The ssh_public_key must be a valid OpenSSH public key format 
+      (starting with ssh-rsa, ssh-ed25519, etc.).
+    EOT
+  }
+}
+
+variable "ssh_public_key_path" {
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+  description = <<-EOT
+    The local filesystem path to the SSH public key file.
+  EOT
+
+  validation {
+    condition = (
+      can(regex("^(/|./|../|[a-zA-Z]:).+$", var.ssh_public_key_path))
+    )
+    error_message = <<EOT
+      The ssh_public_key_path must be a valid absolute or relative filesystem path.
+    EOT
+  }
+}
 
 variable "private_registries" {
   type = list(object({
