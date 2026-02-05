@@ -40,3 +40,6 @@ terraform.rc
 NOTES.md
 
 !example.auto.tfvars
+
+encryption.tf
+secrets.auto.sops.tfvars

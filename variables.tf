@@ -268,15 +268,15 @@ variable "openstack_region" {
 
 variable "openstack_auth" {
   type = object({
-    user_name = string
-    password  = string
-    auth_url  = string
+    user_name = optional(string)
+    password  = optional(string)
+    auth_url  = optional(string)
   })
 
   default = {
-    user_name = ""
-    password  = ""
-    auth_url  = ""
+    user_name = null
+    password  = null
+    auth_url  = null
   }
 
   description = <<-EOT
@@ -286,9 +286,9 @@ variable "openstack_auth" {
 
   validation {
     condition = (
-      length(var.openstack_auth.user_name) > 0 &&
-      length(var.openstack_auth.password) > 0 &&
-      can(regex("^https?://.+", var.openstack_auth.auth_url))
+      (var.openstack_auth.user_name == null || length(try(var.openstack_auth.user_name, "")) > 0) &&
+      (var.openstack_auth.password == null || length(try(var.openstack_auth.password, "")) > 0) &&
+      (var.openstack_auth.auth_url == null || can(regex("^https?://.+", var.openstack_auth.auth_url)))
     )
     error_message = <<EOT
       The openstack_auth variables are invalid:

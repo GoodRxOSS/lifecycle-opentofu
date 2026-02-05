@@ -29,17 +29,6 @@ locals {
       ingress          = true                                         # flag to disable kubernetes ingress resource
       tls              = true
     }
-    kuard = {
-      image = "gcr.io/kuar-demo/kuard-amd64:1"
-      port  = 8080
-    }
-    kuard-wildcard = {
-      image          = "gcr.io/kuar-demo/kuard-amd64:1"
-      port           = 8080
-      host           = format("*.%s", var.app_domain)
-      tls            = false
-      cluster_issuer = "letsencrypt-dns"
-    }
     grpcbin = {
       disabled         = true
       image            = "moul/grpcbin"
