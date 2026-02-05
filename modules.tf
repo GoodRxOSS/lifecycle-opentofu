@@ -39,6 +39,22 @@ module "gke" {
   cluster_name = var.cluster_name
 }
 
+module "magnum" {
+  count = var.cluster_provider == "magnum" ? 1 : 0
+
+  source = "./modules/openstack-magnum"
+
+  providers = {
+    openstack = openstack.alias["0"]
+  }
+
+  region              = var.openstack_region
+  project             = var.openstack_project
+  cluster_name        = var.cluster_name
+  ssh_public_key      = var.ssh_public_key
+  ssh_public_key_path = var.ssh_public_key_path
+}
+
 module "route53" {
   count = var.dns_provider == "route53" ? 1 : 0
 

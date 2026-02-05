@@ -18,3 +18,15 @@ output "help" {
     Quick help of usage
   EOT
 }
+
+output "kubeconfig" {
+  value       = local.cluster.kubeconfig
+  sensitive   = true
+  description = <<-EOT
+    The Kubernetes configuration file (kubeconfig) for the Magnum cluster.
+    This configuration is primarily generated based on the client certificates, 
+    private keys, and CA data provided by the OpenStack Magnum API.
+    It provides 'kubectl' with the necessary credentials to authenticate 
+    and manage the cluster with administrative privileges.
+  EOT
+}

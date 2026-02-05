@@ -45,15 +45,33 @@ provider "google" {
   )
 }
 
+provider "openstack" {
+  for_each = (var.cluster_provider == "magnum"
+    ? toset(["0"]) : []
+  )
+
+  alias = "alias"
+
+  user_name   = var.openstack_auth.user_name
+  password    = var.openstack_auth.password
+  auth_url    = var.openstack_auth.auth_url
+  tenant_name = var.openstack_project
+  region      = var.openstack_region
+}
+
 provider "kubernetes" {
   host                   = local.cluster.endpoint
   cluster_ca_certificate = local.cluster.ca_certificate
+  client_certificate     = local.cluster.client_certificate
+  client_key             = local.cluster.client_key
   token                  = local.cluster.token
 }
 
 provider "kubectl" {
   host                   = local.cluster.endpoint
   cluster_ca_certificate = local.cluster.ca_certificate
+  client_certificate     = local.cluster.client_certificate
+  client_key             = local.cluster.client_key
   token                  = local.cluster.token
   load_config_file       = false
 }
@@ -62,6 +80,8 @@ provider "helm" {
   kubernetes {
     host                   = local.cluster.endpoint
     cluster_ca_certificate = local.cluster.ca_certificate
+    client_certificate     = local.cluster.client_certificate
+    client_key             = local.cluster.client_key
     token                  = local.cluster.token
   }
 

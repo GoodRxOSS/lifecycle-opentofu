@@ -15,7 +15,7 @@
 # Main cluster bootstrap steps
 
 resource "helm_release" "cluster_autoscaler" {
-  count = var.cluster_provider == "gke" ? 1 : 0
+  count = contains(["gke", "magnum"], var.cluster_provider) ? 1 : 0
 
   name             = "cluster-autoscaler"
   repository       = "https://kubernetes.github.io/autoscaler"
@@ -29,6 +29,7 @@ resource "helm_release" "cluster_autoscaler" {
       cloudProvider = (
         var.cluster_provider == "gke" ? "gce" :
         var.cluster_provider == "eks" ? "aws" :
+        var.cluster_provider == "magnum" ? "magnum" :
         "clusterapi"
       )
       autoDiscovery = {
@@ -37,13 +38,40 @@ resource "helm_release" "cluster_autoscaler" {
       rbac = {
         create = true
       }
-      extraArgs = {
+
+      extraArgs = merge({
         "balance-similar-node-groups"   = "true"
         "skip-nodes-with-local-storage" = "false"
         "expander"                      = "least-waste"
-      }
+        },
+        (
+          var.cluster_provider == "magnum" ? {
+            cloud-config = "/etc/kubernetes/magnum-config/cloud.conf"
+          } : {}
+        )
+      )
+
       extraEnv = var.cluster_provider == "eks" ? {
         "AWS_REGION" = var.aws_region
+      } : {}
+
+      cloudConfigPath = (
+        var.cluster_provider == "magnum"
+        ? "/etc/kubernetes/cloud-config"
+        : null
+      )
+
+      extraVolumeSecrets = var.cluster_provider == "magnum" ? {
+        "cloud-config" = {
+          name      = "cinder-csi-cloud-config"
+          mountPath = "/etc/kubernetes/magnum-config/"
+          items = [
+            {
+              key  = "cloud-config"
+              path = "cloud.conf"
+            }
+          ]
+        }
       } : {}
     })
   ]
