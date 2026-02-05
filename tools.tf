@@ -43,20 +43,29 @@ locals {
     grpcbin = {
       disabled         = true
       image            = "moul/grpcbin"
-      port             = 9000
-      backend_protocol = "GRPC"
+      host             = format("wildcard.%s", var.app_domain)
+      port             = 9001
+      backend_protocol = "HTTP"
+      cluster_issuer   = "letsencrypt-dns"
     }
     grpcui = {
-      disabled = true
-      image    = "fullstorydev/grpcui:v1.4.3"
-      port     = 8080
+      disabled       = true
+      image          = "fullstorydev/grpcui:v1.4.3"
+      host           = format("*.%s", var.app_domain)
+      port           = 8080
+      tls            = false
+      cluster_issuer = "letsencrypt-dns"
       args = [
-        format("grpcbin.%s:443", var.app_domain),
+        # format("grpcbin.%s:443", var.app_domain),
+        format(
+          "grpcbin.%s.svc.cluster.local:9000",
+          kubernetes_namespace_v1.app.metadata[0].name
+        ),
       ]
     }
     alpine = {
       disabled = true
-      image    = "alpine:3.21.3"
+      image    = "alpine:3.23.3"
       port     = 6379
       args = [
         "tail",
@@ -69,7 +78,7 @@ locals {
     alpine-env = {
       disabled = true
       name     = "alpine"
-      image    = "alpine:3.21.3"
+      image    = "alpine:3.23.3"
       args = [
         "tail",
         "-f",
@@ -77,9 +86,9 @@ locals {
       ]
       service   = false
       ingress   = false
-      namespace = "env-shy-dust-159868"
+      namespace = "env-dev-0"
     }
-    varkey-socat = {
+    valkey-socat = {
       disabled = true
       image    = "alpine/socat"
       args = [
@@ -105,6 +114,25 @@ locals {
       ]
       service = false
       ingress = false
+    }
+    adminer = {
+      disabled       = false
+      image          = "adminneoorg/adminneo:5.2.1"
+      port           = 8080
+      tls            = false
+      cluster_issuer = "letsencrypt-dns"
+      env = {
+        NEO_VERSION_VERIFICATION    = false
+        NEO_COLOR_VARIANT           = "green"
+        NEO_JSON_VALUES_DETECTION   = true
+        NEO_JSON_VALUES_AUTO_FORMAT = true
+        NEO_HIDDEN_DATABASES        = "postgres,template1"
+        NEO_DEFAULT_DRIVER          = "pgsql"
+        NEO_DEFAULT_DATABASE        = "lifecycle"
+        NEO_DEFAULT_SERVER = format("lifecycle-postgres.%s.svc.cluster.local:5432",
+          kubernetes_namespace_v1.app.metadata[0].name
+        )
+      }
     }
   }
   tools0 = {
@@ -151,6 +179,14 @@ resource "kubernetes_deployment" "this" {
           }
 
           args = try(each.value.args, local.tools.default.args)
+
+          dynamic "env" {
+            for_each = try(each.value.env, {})
+            content {
+              name  = env.key
+              value = env.value
+            }
+          }
         }
       }
     }
