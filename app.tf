@@ -344,7 +344,7 @@ resource "helm_release" "app_lifecycle_keycloak" {
   name             = "lifecycle-keycloak"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-keycloak"
-  version          = "0.2.0"
+  version          = "0.4.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -385,7 +385,7 @@ resource "helm_release" "lifecycle_ui" {
   name             = "lifecycle-ui"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-ui"
-  version          = "0.1.1"
+  version          = "0.2.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -400,7 +400,7 @@ resource "helm_release" "lifecycle_ui" {
   values = [
     yamlencode({
       image = {
-        tag = "0.1.1-alpha.7"
+        tag = "0.1.2"
       }
       global = {
         domain      = var.app_domain
@@ -408,20 +408,14 @@ resource "helm_release" "lifecycle_ui" {
       }
 
       config = {
-        nextPublicApiUrl          = format("https://app.%s", var.app_domain)
-        apiUrl                    = format("https://app.%s", var.app_domain)
-        nextPublicKeycloakBaseUrl = format("https://auth.%s", var.app_domain)
-        keycloakBaseUrl           = format("https://auth.%s", var.app_domain)
-        nextPublicKeycloakRealm   = "lifecycle"
-        keycloakRealm             = "lifecycle"
-        keycloakClientId          = "lifecycle-ui"
-        keycloakServiceClientId   = "lifecycle-ui-backend"
-
+        apiUrl       = format("https://app.%s", var.app_domain)
+        authBaseUrl  = format("https://auth.%s", var.app_domain)
+        authRealm    = "lifecycle"
+        authClientId = "lifecycle-ui"
       }
 
       secrets = {
-        keycloakClientSecret        = "lifecycle-ui-secret"
-        keycloakServiceClientSecret = "lifecycle-ui-backend-secret"
+        authClientSecret = "lifecycle-ui-secret"
       }
     })
   ]
