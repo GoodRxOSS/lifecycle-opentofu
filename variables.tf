@@ -537,7 +537,7 @@ variable "keycloak_operator_enabled" {
 
 variable "app_lifecycle_keycloak" {
   type        = bool
-  default     = true
+  default     = false
   description = <<-EOT
     Toggle to control whether Keycloak instance for Lifecycle is deployed.
   EOT

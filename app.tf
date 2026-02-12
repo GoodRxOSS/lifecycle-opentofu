@@ -75,7 +75,7 @@ resource "helm_release" "app_lifecycle" {
   name             = "lifecycle"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle"
-  version          = "0.4.0"
+  version          = "0.5.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -153,6 +153,15 @@ resource "helm_release" "app_lifecycle" {
       distribution = {
         ingress = {
           hostname = format("%s.%s", var.app_distribution_subdomain, var.app_domain)
+        }
+      }
+
+      keycloak = {
+        hostname = format("https://auth.%s", var.app_domain)
+        clients = {
+          lifecycleUi = {
+            url = format("https://ui.%s", var.app_domain)
+          }
         }
       }
     })
@@ -344,7 +353,7 @@ resource "helm_release" "app_lifecycle_keycloak" {
   name             = "lifecycle-keycloak"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-keycloak"
-  version          = "0.4.0"
+  version          = "0.5.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -355,21 +364,6 @@ resource "helm_release" "app_lifecycle_keycloak" {
       clients = {
         lifecycleUi = {
           url = format("https://ui.%s", var.app_domain)
-        }
-      }
-
-      githubIdp = {
-        clientId = {
-          secretKeyRef = {
-            name = "lifecycle-bootstrap"
-            key  = "GITHUB_CLIENT_ID"
-          }
-        }
-        clientSecret = {
-          secretKeyRef = {
-            name = "lifecycle-bootstrap"
-            key  = "GITHUB_CLIENT_SECRET"
-          }
         }
       }
     })
