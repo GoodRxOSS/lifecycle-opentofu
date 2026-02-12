@@ -379,7 +379,7 @@ Manually removing resources can lead to:
 | <a name="input_app_domain"></a> [app\_domain](#input\_app\_domain) | n/a | `string` | `"example.com"` | no |
 | <a name="input_app_enabled"></a> [app\_enabled](#input\_app\_enabled) | Global toggle to enable or disable the entire application deployment. | `bool` | `true` | no |
 | <a name="input_app_lifecycle_enabled"></a> [app\_lifecycle\_enabled](#input\_app\_lifecycle\_enabled) | Toggle to control whether PostgreSQL is deployed. | `bool` | `true` | no |
-| <a name="input_app_lifecycle_keycloak"></a> [app\_lifecycle\_keycloak](#input\_app\_lifecycle\_keycloak) | Toggle to control whether Keycloak instance for Lifecycle is deployed. | `bool` | `true` | no |
+| <a name="input_app_lifecycle_keycloak"></a> [app\_lifecycle\_keycloak](#input\_app\_lifecycle\_keycloak) | Toggle to control whether Keycloak instance for Lifecycle is deployed. | `bool` | `false` | no |
 | <a name="input_app_lifecycle_ui"></a> [app\_lifecycle\_ui](#input\_app\_lifecycle\_ui) | Toggle to control whether Lifecycle UI is deployed. | `bool` | `true` | no |
 | <a name="input_app_namespace"></a> [app\_namespace](#input\_app\_namespace) | n/a | `string` | `"application-env"` | no |
 | <a name="input_app_postgres_database"></a> [app\_postgres\_database](#input\_app\_postgres\_database) | Name of the PostgreSQL database to create and use. | `string` | `"lifecycle"` | no |
