@@ -75,7 +75,7 @@ resource "helm_release" "app_lifecycle" {
   name             = "lifecycle"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle"
-  version          = "0.5.0"
+  version          = "0.6.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -162,6 +162,13 @@ resource "helm_release" "app_lifecycle" {
           lifecycleUi = {
             url = format("https://ui.%s", var.app_domain)
           }
+        }
+      }
+
+      ui = {
+        config = {
+          apiUrl      = format("https://app.%s", var.app_domain)
+          authBaseUrl = format("https://auth.%s", var.app_domain)
         }
       }
     })
@@ -353,7 +360,7 @@ resource "helm_release" "app_lifecycle_keycloak" {
   name             = "lifecycle-keycloak"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-keycloak"
-  version          = "0.5.0"
+  version          = "0.6.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -366,6 +373,21 @@ resource "helm_release" "app_lifecycle_keycloak" {
           url = format("https://ui.%s", var.app_domain)
         }
       }
+
+      githubIdp = {
+        clientId = {
+          secretKeyRef = {
+            name = "lifecycle-bootstrap"
+            key  = "GITHUB_CLIENT_ID"
+          }
+        }
+        clientSecret = {
+          secretKeyRef = {
+            name = "lifecycle-bootstrap"
+            key  = "GITHUB_CLIENT_SECRET"
+          }
+        }
+      }
     })
   ]
 
@@ -376,10 +398,12 @@ resource "helm_release" "app_lifecycle_keycloak" {
 }
 
 resource "helm_release" "lifecycle_ui" {
+  count = var.app_lifecycle_ui ? 1 : 0
+
   name             = "lifecycle-ui"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-ui"
-  version          = "0.2.0"
+  version          = "0.3.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -397,19 +421,18 @@ resource "helm_release" "lifecycle_ui" {
         tag = "0.1.2"
       }
       global = {
-        domain      = var.app_domain
-        uiSubDomain = "ui"
+        domain = var.app_domain
       }
 
       config = {
-        apiUrl       = format("https://app.%s", var.app_domain)
-        authBaseUrl  = format("https://auth.%s", var.app_domain)
-        authRealm    = "lifecycle"
-        authClientId = "lifecycle-ui"
-      }
-
-      secrets = {
-        authClientSecret = "lifecycle-ui-secret"
+        apiUrl      = format("https://app.%s", var.app_domain)
+        authBaseUrl = format("https://auth.%s", var.app_domain)
+        authClientSecret = {
+          secretKeyRef = {
+            name = "lifecycle-keycloak-lifecycle-ui"
+            key  = "clientSecret"
+          }
+        }
       }
     })
   ]

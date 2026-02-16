@@ -545,7 +545,7 @@ variable "app_lifecycle_keycloak" {
 
 variable "app_lifecycle_ui" {
   type        = bool
-  default     = true
+  default     = false
   description = <<-EOT
     Toggle to control whether Lifecycle UI is deployed.
   EOT
