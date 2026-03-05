@@ -422,14 +422,6 @@ variable "app_subdomain" {
   }
 }
 
-variable "app_postgres_enabled" {
-  type        = bool
-  default     = false
-  description = <<-EOT
-    Toggle to control whether PostgreSQL is deployed.
-  EOT
-}
-
 variable "app_lifecycle_enabled" {
   type        = bool
   default     = true
@@ -438,42 +430,97 @@ variable "app_lifecycle_enabled" {
   EOT
 }
 
-variable "app_postgres_port" {
+variable "postgres_lifecycle_enabled" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Toggle to control whether PostgreSQL Lifecycle is deployed.
+  EOT
+}
+
+variable "postgres_lifecycle_port" {
   type        = number
   default     = 5432
   description = <<-EOT
-    Port used to connect to the PostgreSQL service.
+    Port used to connect to the PostgreSQL Lifecycle service.
   EOT
 
   validation {
-    condition     = var.app_postgres_port > 0 && var.app_postgres_port < 65536
-    error_message = "PostgreSQL port must be between 1 and 65535."
+    condition     = var.postgres_lifecycle_port > 0 && var.postgres_lifecycle_port < 65536
+    error_message = "PostgreSQL Lifecycle port must be between 1 and 65535."
   }
 }
 
-variable "app_postgres_database" {
+variable "postgres_lifecycle_database" {
   type        = string
   default     = "lifecycle"
   description = <<-EOT
-    Name of the PostgreSQL database to create and use.
+    Name of the PostgreSQL Lifecycle database to create and use.
   EOT
 
   validation {
-    condition     = length(trimspace(var.app_postgres_database)) > 0
-    error_message = "PostgreSQL database name must not be empty."
+    condition     = length(trimspace(var.postgres_lifecycle_database)) > 0
+    error_message = "PostgreSQL Lifecycle database name must not be empty."
   }
 }
 
-variable "app_postgres_username" {
+variable "postgres_lifecycle_username" {
   type        = string
   default     = "lifecycle"
   description = <<-EOT
-    Username for accessing the PostgreSQL database.
+    Username for accessing the PostgreSQL Lifecycle database.
   EOT
 
   validation {
-    condition     = length(trimspace(var.app_postgres_username)) > 0
-    error_message = "PostgreSQL username must not be empty."
+    condition     = length(trimspace(var.postgres_lifecycle_username)) > 0
+    error_message = "PostgreSQL Lifecycle username must not be empty."
+  }
+}
+
+variable "postgres_keycloak_enabled" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Toggle to control whether PostgreSQL Keycloak is deployed.
+  EOT
+}
+
+variable "postgres_keycloak_port" {
+  type        = number
+  default     = 5432
+  description = <<-EOT
+    Port used to connect to the PostgreSQL Keycloak service.
+  EOT
+
+  validation {
+    condition     = var.postgres_keycloak_port > 0 && var.postgres_keycloak_port < 65536
+    error_message = "PostgreSQL Keycloak port must be between 1 and 65535."
+  }
+}
+
+variable "postgres_keycloak_database" {
+  type        = string
+  default     = "keycloak"
+  description = <<-EOT
+    Name of the PostgreSQL Keycloak database to create and use.
+  EOT
+
+  validation {
+    condition     = length(trimspace(var.postgres_keycloak_database)) > 0
+    error_message = "PostgreSQL Keycloak database name must not be empty."
+  }
+}
+
+variable "postgres_keycloak_username" {
+  type        = string
+  default     = "keycloak"
+  description = <<-EOT
+    Username for accessing the Keycloak Lifecycle database.
+  EOT
+
+  validation {
+    condition     = length(trimspace(var.postgres_keycloak_username)) > 0
+    error_message = "PostgreSQL Keycloak username must not be empty."
   }
 }
 
@@ -548,5 +595,28 @@ variable "app_lifecycle_ui" {
   default     = false
   description = <<-EOT
     Toggle to control whether Lifecycle UI is deployed.
+  EOT
+}
+
+variable "app_lifecycle_secrets" {
+  type        = any
+  default     = {}
+  description = <<-EOT
+    Map of custom secrets and configurations to be merged into the app-lifecycle 
+    Helm release values. Allows manual provisioning of the 'secrets' block during 
+    bootstrap (e.g., using existing GitHub Application secrets).
+    WARNING: Not recommended for production use. Primarily intended for development 
+    and initial bootstrapping.
+  EOT
+}
+
+variable "external_database_enabled" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    If set to true, the module switches to 'External Database' mode. 
+    This disables internal database provisioning within the main Helm chart and 
+    instead uses separate, independently managed Helm charts for PostgreSQL 
+    (lifecycle and keycloak).
   EOT
 }

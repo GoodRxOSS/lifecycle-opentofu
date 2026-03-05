@@ -339,7 +339,6 @@ Manually removing resources can lead to:
 | [helm_release.app_distribution](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.app_lifecycle](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.app_lifecycle_keycloak](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
-| [helm_release.app_postgres](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.app_redis](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cert_manager](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.cloudflare_tunnel](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -347,6 +346,8 @@ Manually removing resources can lead to:
 | [helm_release.ingress_nginx_controller](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.keycloak_operator](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.lifecycle_ui](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [helm_release.postgres_keycloak](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [helm_release.postgres_lifecycle](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubectl_manifest.letsencrypt_clusterissuer](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs/resources/manifest) | resource |
 | [kubectl_manifest.letsencrypt_dns_certificate](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs/resources/manifest) | resource |
 | [kubectl_manifest.letsencrypt_dns_clusterissuer](https://registry.terraform.io/providers/gavinbunney/kubectl/latest/docs/resources/manifest) | resource |
@@ -357,12 +358,10 @@ Manually removing resources can lead to:
 | [kubernetes_ingress_v1.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/ingress_v1) | resource |
 | [kubernetes_namespace_v1.app](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
 | [kubernetes_secret.image_pull_secret](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret) | resource |
-| [kubernetes_secret_v1.app_postgres](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
 | [kubernetes_secret_v1.app_redis](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
 | [kubernetes_service.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service) | resource |
 | [kubernetes_storage_class.aws_gp3](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/storage_class) | resource |
 | [kubernetes_storage_class.openstack_ssd](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/storage_class) | resource |
-| [random_password.app_postgres](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.app_redis](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.cloudflare_tunnel](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [time_sleep.ingress_nginx_controller](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
@@ -380,12 +379,9 @@ Manually removing resources can lead to:
 | <a name="input_app_enabled"></a> [app\_enabled](#input\_app\_enabled) | Global toggle to enable or disable the entire application deployment. | `bool` | `true` | no |
 | <a name="input_app_lifecycle_enabled"></a> [app\_lifecycle\_enabled](#input\_app\_lifecycle\_enabled) | Toggle to control whether PostgreSQL is deployed. | `bool` | `true` | no |
 | <a name="input_app_lifecycle_keycloak"></a> [app\_lifecycle\_keycloak](#input\_app\_lifecycle\_keycloak) | Toggle to control whether Keycloak instance for Lifecycle is deployed. | `bool` | `false` | no |
+| <a name="input_app_lifecycle_secrets"></a> [app\_lifecycle\_secrets](#input\_app\_lifecycle\_secrets) | Map of custom secrets and configurations to be merged into the app-lifecycle <br/>Helm release values. Allows manual provisioning of the 'secrets' block during <br/>bootstrap (e.g., using existing GitHub Application secrets).<br/>WARNING: Not recommended for production use. Primarily intended for development <br/>and initial bootstrapping. | `any` | `{}` | no |
 | <a name="input_app_lifecycle_ui"></a> [app\_lifecycle\_ui](#input\_app\_lifecycle\_ui) | Toggle to control whether Lifecycle UI is deployed. | `bool` | `false` | no |
 | <a name="input_app_namespace"></a> [app\_namespace](#input\_app\_namespace) | n/a | `string` | `"application-env"` | no |
-| <a name="input_app_postgres_database"></a> [app\_postgres\_database](#input\_app\_postgres\_database) | Name of the PostgreSQL database to create and use. | `string` | `"lifecycle"` | no |
-| <a name="input_app_postgres_enabled"></a> [app\_postgres\_enabled](#input\_app\_postgres\_enabled) | Toggle to control whether PostgreSQL is deployed. | `bool` | `false` | no |
-| <a name="input_app_postgres_port"></a> [app\_postgres\_port](#input\_app\_postgres\_port) | Port used to connect to the PostgreSQL service. | `number` | `5432` | no |
-| <a name="input_app_postgres_username"></a> [app\_postgres\_username](#input\_app\_postgres\_username) | Username for accessing the PostgreSQL database. | `string` | `"lifecycle"` | no |
 | <a name="input_app_redis_enabled"></a> [app\_redis\_enabled](#input\_app\_redis\_enabled) | Toggle to control whether Redis is deployed. | `bool` | `false` | no |
 | <a name="input_app_redis_port"></a> [app\_redis\_port](#input\_app\_redis\_port) | Port used to connect to the Redis service. | `number` | `6379` | no |
 | <a name="input_app_subdomain"></a> [app\_subdomain](#input\_app\_subdomain) | Subdomain used to expose the Application module. | `string` | `"app"` | no |
@@ -398,6 +394,7 @@ Manually removing resources can lead to:
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the Kubernetes cluster.<br/>Must consist of alphanumeric characters, dashes, and be 1–100 characters long. | `string` | `"k8s-cluster"` | no |
 | <a name="input_cluster_provider"></a> [cluster\_provider](#input\_cluster\_provider) | n/a | `string` | `"eks"` | no |
 | <a name="input_dns_provider"></a> [dns\_provider](#input\_dns\_provider) | n/a | `string` | `"route53"` | no |
+| <a name="input_external_database_enabled"></a> [external\_database\_enabled](#input\_external\_database\_enabled) | If set to true, the module switches to 'External Database' mode. <br/>This disables internal database provisioning within the main Helm chart and <br/>instead uses separate, independently managed Helm charts for PostgreSQL <br/>(lifecycle and keycloak). | `bool` | `false` | no |
 | <a name="input_gcp_credentials_file"></a> [gcp\_credentials\_file](#input\_gcp\_credentials\_file) | n/a | `string` | `null` | no |
 | <a name="input_gcp_project"></a> [gcp\_project](#input\_gcp\_project) | The Google Cloud Project ID to use for creating and managing resources.<br/>This should be the unique identifier of your GCP project.<br/>If not provided (null), some modules might attempt to infer the project from<br/>your environment or credentials.<br/><br/>Format requirements:<br/>  - Length between 6 and 30 characters<br/>  - Lowercase letters, digits, and hyphens only<br/>  - Must start with a lowercase letter<br/>  - Cannot end with a hyphen | `string` | `null` | no |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | The Google Cloud region or zone where the GKE cluster is deployed.<br/>Example: "us-central1" or "us-central1-b" | `string` | `"us-central1-b"` | no |
@@ -406,6 +403,14 @@ Manually removing resources can lead to:
 | <a name="input_openstack_project"></a> [openstack\_project](#input\_openstack\_project) | The name of the OpenStack project (tenant). <br/>Must be URL-safe and follow corporate naming conventions. | `string` | `null` | no |
 | <a name="input_openstack_region"></a> [openstack\_region](#input\_openstack\_region) | The name of the OpenStack region. Standard default is RegionOne. | `string` | `"RegionOne"` | no |
 | <a name="input_pbkdf2_passphrase"></a> [pbkdf2\_passphrase](#input\_pbkdf2\_passphrase) | n/a | `string` | n/a | yes |
+| <a name="input_postgres_keycloak_database"></a> [postgres\_keycloak\_database](#input\_postgres\_keycloak\_database) | Name of the PostgreSQL Keycloak database to create and use. | `string` | `"keycloak"` | no |
+| <a name="input_postgres_keycloak_enabled"></a> [postgres\_keycloak\_enabled](#input\_postgres\_keycloak\_enabled) | Toggle to control whether PostgreSQL Keycloak is deployed. | `bool` | `false` | no |
+| <a name="input_postgres_keycloak_port"></a> [postgres\_keycloak\_port](#input\_postgres\_keycloak\_port) | Port used to connect to the PostgreSQL Keycloak service. | `number` | `5432` | no |
+| <a name="input_postgres_keycloak_username"></a> [postgres\_keycloak\_username](#input\_postgres\_keycloak\_username) | Username for accessing the Keycloak Lifecycle database. | `string` | `"keycloak"` | no |
+| <a name="input_postgres_lifecycle_database"></a> [postgres\_lifecycle\_database](#input\_postgres\_lifecycle\_database) | Name of the PostgreSQL Lifecycle database to create and use. | `string` | `"lifecycle"` | no |
+| <a name="input_postgres_lifecycle_enabled"></a> [postgres\_lifecycle\_enabled](#input\_postgres\_lifecycle\_enabled) | Toggle to control whether PostgreSQL Lifecycle is deployed. | `bool` | `false` | no |
+| <a name="input_postgres_lifecycle_port"></a> [postgres\_lifecycle\_port](#input\_postgres\_lifecycle\_port) | Port used to connect to the PostgreSQL Lifecycle service. | `number` | `5432` | no |
+| <a name="input_postgres_lifecycle_username"></a> [postgres\_lifecycle\_username](#input\_postgres\_lifecycle\_username) | Username for accessing the PostgreSQL Lifecycle database. | `string` | `"lifecycle"` | no |
 | <a name="input_private_registries"></a> [private\_registries](#input\_private\_registries) | Configuration for private registries (Helm charts and Container images).<br/>If empty, no registry blocks will be created. | <pre>list(object({<br/>    url      = string<br/>    username = string<br/>    password = string<br/>    usage    = list(string) # ["charts", "images"]<br/>  }))</pre> | `[]` | no |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | The content of the SSH public key (e.g., contents of ~/.ssh/id\_rsa.pub). <br/>Supports RSA, ECDSA, and ED25519 formats. | `string` | `null` | no |
 | <a name="input_ssh_public_key_path"></a> [ssh\_public\_key\_path](#input\_ssh\_public\_key\_path) | The local filesystem path to the SSH public key file. | `string` | `"~/.ssh/id_rsa.pub"` | no |
