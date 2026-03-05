@@ -188,7 +188,7 @@ variable "cluster_max_size" {
 
 variable "cluster_min_size" {
   type    = number
-  default = 2
+  default = 3
 
   description = <<EOT
     The minimum number of nodes in the EKS node group.

@@ -20,13 +20,6 @@ resource "kubernetes_namespace_v1" "app" {
   }
 }
 
-resource "random_password" "app_postgres" {
-  count = var.app_postgres_enabled ? 1 : 0
-
-  length  = 40
-  special = false
-}
-
 resource "random_password" "app_redis" {
   count = var.app_redis_enabled ? 1 : 0
 
@@ -75,7 +68,7 @@ resource "helm_release" "app_lifecycle" {
   name             = "lifecycle"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle"
-  version          = "0.6.0"
+  version          = "0.7.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
@@ -88,13 +81,14 @@ resource "helm_release" "app_lifecycle" {
   }
 
   values = [
-    yamlencode({
+    yamlencode(merge({
       global = {
         domain = var.app_domain
         image = {
           tag = "0.1.11"
         }
       }
+
       components = {
         web = {
           deployment = {
@@ -132,7 +126,7 @@ resource "helm_release" "app_lifecycle" {
                     var.app_domain,
                   )
                 }
-              ] : []
+              ] : [],
             )
           }
         }
@@ -156,34 +150,85 @@ resource "helm_release" "app_lifecycle" {
         }
       }
 
-      keycloak = {
-        hostname = format("https://auth.%s", var.app_domain)
-        clients = {
-          lifecycleUi = {
-            url = format("https://ui.%s", var.app_domain)
-          }
-        }
-      }
-
       ui = {
         config = {
           apiUrl      = format("https://app.%s", var.app_domain)
           authBaseUrl = format("https://auth.%s", var.app_domain)
         }
       }
-    })
+
+      keycloak = merge(
+        {
+          hostname = format("https://auth.%s", var.app_domain)
+          clients = {
+            lifecycleUi = {
+              url = format("https://ui.%s", var.app_domain)
+            }
+          }
+        },
+        var.external_database_enabled ? [{
+          keycloakPostgres = {
+            enabled = false
+          }
+          secrets = {
+            postgres = {
+              enabled = false
+            }
+          }
+          externalDatabase = {
+            enabled  = true
+            host     = "postgres-keycloak.lifecycle-app.svc.cluster.local"
+            port     = var.postgres_keycloak_port
+            database = var.postgres_keycloak_database
+            username = var.postgres_keycloak_username
+            password = {
+              secretKeyRef = {
+                name = "postgres-keycloak"
+                key  = "password"
+              }
+            }
+          }
+        }] : []...
+      )
+
+      },
+      concat(
+        var.external_database_enabled ? [{
+          postgres = {
+            enabled = false
+          }
+
+          externalDatabase = {
+            enabled  = true
+            host     = "postgres-lifecycle.lifecycle-app.svc.cluster.local"
+            port     = var.postgres_lifecycle_port
+            database = var.postgres_lifecycle_database
+            username = var.postgres_lifecycle_username
+            password = {
+              secretKeyRef = {
+                name = "postgres-lifecycle"
+                key  = "password"
+              }
+            }
+          }
+        }] : [],
+        var.app_lifecycle_secrets != {} ? [var.app_lifecycle_secrets] : [],
+      )...
+    ))
   ]
 
   depends_on = [
     kubernetes_namespace_v1.app,
     time_sleep.ingress_nginx_controller,
+    helm_release.postgres_lifecycle,
+    helm_release.postgres_keycloak,
   ]
 }
 
-resource "helm_release" "app_postgres" {
-  count = var.app_postgres_enabled ? 1 : 0
+resource "helm_release" "postgres_lifecycle" {
+  count = var.postgres_lifecycle_enabled || var.external_database_enabled ? 1 : 0
 
-  name             = "postgres"
+  name             = "postgres-lifecycle"
   repository       = "https://charts.bitnami.com/bitnami"
   chart            = "postgresql"
   version          = "15.5.19"
@@ -192,17 +237,65 @@ resource "helm_release" "app_postgres" {
 
   values = [
     yamlencode({
-      fullnameOverride = "postgres"
+      image = {
+        repository = "bitnamilegacy/postgresql"
+      }
+      fullnameOverride = "postgres-lifecycle"
       auth = {
         enabled  = true
-        database = var.app_postgres_database
-        username = var.app_postgres_username
-        password = one(random_password.app_postgres[*].result)
+        database = var.postgres_lifecycle_database
+        username = var.postgres_lifecycle_username
       }
       primary = {
         persistence = {
           enabled = true
           size    = "11Gi"
+        }
+        # initdb = {
+        #   scripts = {
+        #     "create_extra_db.sql" = <<-EOT
+        #       CREATE DATABASE keycloak;
+        #       GRANT ALL PRIVILEGES ON DATABASE keycloak TO lifecycle;
+        #       GRANT ALL ON SCHEMA public TO lifecycle;
+        #       GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO lifecycle;
+        #       GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO lifecycle;
+        #     EOT
+        #   }
+        # }
+      }
+    })
+  ]
+
+  depends_on = [
+    kubernetes_namespace_v1.app
+  ]
+}
+
+resource "helm_release" "postgres_keycloak" {
+  count = var.postgres_keycloak_enabled || var.external_database_enabled ? 1 : 0
+
+  name             = "postgres-keycloak"
+  repository       = "https://charts.bitnami.com/bitnami"
+  chart            = "postgresql"
+  version          = "15.5.19"
+  namespace        = kubernetes_namespace_v1.app.metadata[0].name
+  create_namespace = false
+
+  values = [
+    yamlencode({
+      image = {
+        repository = "bitnamilegacy/postgresql"
+      }
+      fullnameOverride = "postgres-keycloak"
+      auth = {
+        enabled  = true
+        database = var.postgres_keycloak_database
+        username = var.postgres_keycloak_username
+      }
+      primary = {
+        persistence = {
+          enabled = true
+          size    = "1Gi"
         }
       }
     })
@@ -225,6 +318,9 @@ resource "helm_release" "app_redis" {
 
   values = [
     yamlencode({
+      image = {
+        repository = "bitnamilegacy/redis"
+      }
       fullnameOverride = "redis"
       architecture     = "standalone"
       auth = {
@@ -318,25 +414,6 @@ resource "helm_release" "app_buildkit" {
   ]
 }
 
-resource "kubernetes_secret_v1" "app_postgres" {
-  count = var.app_postgres_enabled ? 1 : 0
-
-  metadata {
-    name      = "app-postgres"
-    namespace = var.app_namespace
-  }
-
-  data = {
-    DATABASE_URL = format("postgresql://%s:%s@postgres.%s.svc.cluster.local:%d/%s",
-      var.app_postgres_username,
-      one(random_password.app_postgres[*].result),
-      var.app_namespace,
-      var.app_postgres_port,
-      var.app_postgres_database,
-    )
-  }
-}
-
 resource "kubernetes_secret_v1" "app_redis" {
   count = var.app_redis_enabled ? 1 : 0
 
@@ -360,7 +437,7 @@ resource "helm_release" "app_lifecycle_keycloak" {
   name             = "lifecycle-keycloak"
   repository       = "oci://ghcr.io/goodrxoss/helm-charts"
   chart            = "lifecycle-keycloak"
-  version          = "0.6.0"
+  version          = "0.7.0"
   namespace        = kubernetes_namespace_v1.app.metadata[0].name
   create_namespace = false
 
