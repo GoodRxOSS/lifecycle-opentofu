@@ -139,3 +139,21 @@ variable "cluster_min_size" {
     error_message = "Min size must be at least 1"
   }
 }
+
+variable "external_secrets_enabled" {
+  type    = bool
+  default = false
+
+  description = <<-EOT
+    Enable IAM role for External Secrets Operator.
+  EOT
+}
+
+variable "external_secrets_namespace" {
+  type    = string
+  default = "external-secrets"
+
+  description = <<-EOT
+    Namespace where External Secrets Operator is installed.
+  EOT
+}

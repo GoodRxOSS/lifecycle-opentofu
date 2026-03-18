@@ -21,8 +21,11 @@ No modules.
 |------|------|
 | [google_container_cluster.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster) | resource |
 | [google_container_node_pool.default](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool) | resource |
+| [google_project_iam_member.eso_secret_accessor](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_project_iam_member.metrics](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
+| [google_service_account.eso](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
+| [google_service_account_iam_member.eso_workload_identity](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_iam_member) | resource |
 | [google_client_config.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/client_config) | data source |
 | [google_project.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
 
@@ -31,6 +34,8 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the GKE cluster.<br/>This value is used to identify the cluster within GCP and should be unique<br/>within the selected project and region.<br/>Example: "application-gke" | `string` | `"application-gke"` | no |
+| <a name="input_external_secrets_enabled"></a> [external\_secrets\_enabled](#input\_external\_secrets\_enabled) | Enable Workload Identity for External Secrets Operator. | `bool` | `false` | no |
+| <a name="input_external_secrets_namespace"></a> [external\_secrets\_namespace](#input\_external\_secrets\_namespace) | Namespace where External Secrets Operator is installed. | `string` | `"external-secrets"` | no |
 | <a name="input_gcp_region"></a> [gcp\_region](#input\_gcp\_region) | The Google Cloud region or zone where the GKE cluster is deployed.<br/>Example: "us-central1" or "us-central1-b" | `string` | `"us-central1-b"` | no |
 
 ## Outputs
@@ -41,4 +46,5 @@ No modules.
 | <a name="output_cluster_endpoint"></a> [cluster\_endpoint](#output\_cluster\_endpoint) | The public endpoint URL used to connect to the GKE cluster's Kubernetes API server.<br/>This value is required when configuring kubectl or other Kubernetes clients. |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the created Google Kubernetes Engine (GKE) cluster.<br/>Useful for referencing the cluster by name in external modules or scripts. |
 | <a name="output_cluster_token"></a> [cluster\_token](#output\_cluster\_token) | The OAuth2 access token for the active Google Cloud user account.<br/>This token can be used for authenticating against the Kubernetes API,<br/>typically passed as a Bearer token in client requests. Marked as sensitive. |
+| <a name="output_eso_service_account_email"></a> [eso\_service\_account\_email](#output\_eso\_service\_account\_email) | Email of the GCP service account for External Secrets Operator.<br/>Used to configure Workload Identity for the ESO service account. |
 <!-- END_TF_DOCS -->

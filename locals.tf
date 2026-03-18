@@ -15,6 +15,10 @@
 # Locals and helpers
 
 locals {
+  is_eks    = var.cluster_provider == "eks"
+  is_gke    = var.cluster_provider == "gke"
+  is_magnum = var.cluster_provider == "magnum"
+
   cluster = (
     var.cluster_provider == "eks" ? {
       name               = one(module.eks[*].cluster_name)

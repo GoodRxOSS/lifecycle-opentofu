@@ -598,6 +598,45 @@ variable "app_lifecycle_ui" {
   EOT
 }
 
+variable "external_secrets_enabled" {
+  type    = bool
+  default = true
+
+  description = <<-EOT
+    Enable External Secrets Operator for cloud secrets integration.
+    When enabled, ESO will be installed and configured with the appropriate
+    ClusterSecretStore for the cluster provider (AWS, GCP or OpenStack).
+  EOT
+}
+
+variable "external_secrets_namespace" {
+  type    = string
+  default = "external-secrets"
+
+  description = <<-EOT
+    Namespace for External Secrets Operator installation.
+  EOT
+
+  validation {
+    condition     = can(regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$", var.external_secrets_namespace)) && length(var.external_secrets_namespace) <= 63
+    error_message = <<-EOT
+      external_secrets_namespace must be a valid Kubernetes namespace name:
+        - 1 to 63 characters long
+        - lowercase letters, digits, and hyphens only
+        - must start and end with a letter or digit
+    EOT
+  }
+}
+
+variable "external_secrets_chart_version" {
+  type    = string
+  default = "2.1.0"
+
+  description = <<-EOT
+    External Secrets Operator Helm chart version.
+  EOT
+}
+
 variable "app_lifecycle_secrets" {
   type        = any
   default     = {}

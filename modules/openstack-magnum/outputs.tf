@@ -68,3 +68,14 @@ output "cluster_raw_config" {
     Contains all necessary credentials, endpoints, and context to access the cluster immediately.
   EOT
 }
+
+output "eso_application_credentials" {
+  value = var.external_secrets_enabled ? {
+    id     = one(openstack_identity_application_credential_v3.eso[*].id)
+    secret = one(openstack_identity_application_credential_v3.eso[*].secret)
+  } : null
+
+  description = <<-EOT
+    Application Credential for External Secrets Operator.
+  EOT
+}

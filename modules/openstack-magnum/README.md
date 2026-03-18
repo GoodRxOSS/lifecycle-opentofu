@@ -23,6 +23,7 @@ No modules.
 | [openstack_containerinfra_cluster_v1.this](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/containerinfra_cluster_v1) | resource |
 | [openstack_containerinfra_clustertemplate_v1.this](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/containerinfra_clustertemplate_v1) | resource |
 | [openstack_containerinfra_nodegroup_v1.this](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/containerinfra_nodegroup_v1) | resource |
+| [openstack_identity_application_credential_v3.eso](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/identity_application_credential_v3) | resource |
 | [openstack_networking_network_v2.internal](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/networking_network_v2) | resource |
 | [openstack_networking_router_interface_v2.this](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/networking_router_interface_v2) | resource |
 | [openstack_networking_router_v2.external](https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs/resources/networking_router_v2) | resource |
@@ -42,6 +43,7 @@ No modules.
 | <a name="input_cluster_max_size"></a> [cluster\_max\_size](#input\_cluster\_max\_size) | The maximum number of nodes the EKS node group can scale up to.<br/>    Useful for configuring cluster autoscaler or other capacity limits. | `number` | `7` | no |
 | <a name="input_cluster_min_size"></a> [cluster\_min\_size](#input\_cluster\_min\_size) | The minimum number of nodes in the EKS node group.<br/>    Cluster autoscaler or node group logic will not scale below this value. | `number` | `3` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The name of the OpenStack Magnum COE (Container Orchestration Engine) cluster.<br/>This name is used to identify the cluster within the OpenStack project and will <br/>be visible in the 'openstack coe cluster list' output.<br/>Must start with a letter and contain only alphanumeric characters or dashes. | `string` | `"k8s"` | no |
+| <a name="input_external_secrets_enabled"></a> [external\_secrets\_enabled](#input\_external\_secrets\_enabled) | Enable Application Credential for External Secrets Operator. | `bool` | `false` | no |
 | <a name="input_network_external_name"></a> [network\_external\_name](#input\_network\_external\_name) | The name of the OpenStack external network. Used as the 'name' attribute for the network resource. | `string` | `"external"` | no |
 | <a name="input_network_internal_name"></a> [network\_internal\_name](#input\_network\_internal\_name) | The name of the OpenStack internal network. Used as the 'name' attribute for the network resource. | `string` | `"internal"` | no |
 | <a name="input_network_subnets"></a> [network\_subnets](#input\_network\_subnets) | A map of subnet names to CIDR blocks used within the network.<br/>The key is the subnet name (must be URL-safe), and the value is a valid IPv4 CIDR. | `map(string)` | <pre>{<br/>  "internal-1": "192.168.111.0/24",<br/>  "internal-2": "192.168.112.0/24",<br/>  "internal-3": "192.168.113.0/24"<br/>}</pre> | no |
@@ -60,4 +62,5 @@ No modules.
 | <a name="output_cluster_endpoint"></a> [cluster\_endpoint](#output\_cluster\_endpoint) | The Kubernetes API server endpoint URL. <br/>This is the address used by kubectl and other clients to communicate with the cluster control plane. |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The name of the OpenStack Magnum Kubernetes cluster. <br/>Used to identify the cluster within the Container Infrastructure Management service. |
 | <a name="output_cluster_raw_config"></a> [cluster\_raw\_config](#output\_cluster\_raw\_config) | The full, ready-to-use Kubeconfig file in YAML format. <br/>Contains all necessary credentials, endpoints, and context to access the cluster immediately. |
+| <a name="output_eso_application_credentials"></a> [eso\_application\_credentials](#output\_eso\_application\_credentials) | Application Credential for External Secrets Operator. |
 <!-- END_TF_DOCS -->
